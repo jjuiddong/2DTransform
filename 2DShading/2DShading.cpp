@@ -1,25 +1,23 @@
 
 #include "stdafx.h"
-#include "2DTransform.h"
-#include "math/Math.h"
+#include "2DShading.h"
 #include <vector>
-#include <algorithm>
+#include "DrawTriangle.h"
+#include "math/Math.h"
 
 using namespace std;
+
 #define MAX_LOADSTRING 100
 
 HINSTANCE hInst;
 HWND g_hWnd;
 TCHAR szTitle[MAX_LOADSTRING];
 TCHAR szWindowClass[MAX_LOADSTRING];
-vector<Vector3> g_vertices1;
-vector<Vector3> g_vertices2;
-Matrix44 g_matWorld1;
-Matrix44 g_matLocal1;
-Matrix44 g_matWorld2;
-Matrix44 g_matLocal2;
-Matrix44 g_matWorld3;
-Matrix44 g_matLocal3;
+vector<Vector3> g_vertices;
+vector<int> g_indices;
+Matrix44 g_matWorld;
+Matrix44 g_matLocal;
+bool g_WireFrame = false;
 
 
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -36,7 +34,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
 	LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	LoadString(hInstance, IDC_MY2DTRANSFORM, szWindowClass, MAX_LOADSTRING);
+	LoadString(hInstance, IDC_MY2DSHADING, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
 	// vertices1
@@ -46,39 +44,22 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	//       |                                                       |
 	//       (-50,+50)  ----------------- (+50, +50)
 	const float w = 50.f;
-	g_vertices1.push_back( Vector3(-w,-w,1) );
-	g_vertices1.push_back( Vector3(w,-w,1) );
-	g_vertices1.push_back( Vector3(w,w,1) );
-	g_vertices1.push_back( Vector3(-w,w,1) );
-	g_vertices1.push_back( Vector3(-w,-w,1) );
+	g_vertices.push_back( Vector3(-w,-w,1) );
+	g_vertices.push_back( Vector3(w,-w,1) );
+	g_vertices.push_back( Vector3(w,w,1) );
+	g_vertices.push_back( Vector3(-w,w,1) );
 
+	g_indices.push_back(0);
+	g_indices.push_back(3);
+	g_indices.push_back(2);
 
-	// vertices2
-	//       +(0,0)  ----------------- (+100, 0)
-	//       |                                               |
-	//       |                                               |
-	//       |                                               |
-	//       (0,+100)  ------------- (+1-0, +100)
-	const float w2 = 100.f;
-	g_vertices2.push_back( Vector3(0,0,1) );
-	g_vertices2.push_back( Vector3(w2,0,1) );
-	g_vertices2.push_back( Vector3(w2,w2,1) );
-	g_vertices2.push_back( Vector3(0,w2,1) );
-	g_vertices2.push_back( Vector3(0,0,1) );
+	g_indices.push_back(0);
+	g_indices.push_back(2);
+	g_indices.push_back(1);
 
-
-	g_matWorld1.SetIdentity();
-	g_matWorld1.Translate(Vector3(150,200,0));
-	g_matLocal1.SetIdentity();
-
-	g_matWorld2.SetIdentity();
-	g_matWorld2.Translate(Vector3(400,200,0));	
-	g_matLocal2.SetIdentity();
-
-	g_matWorld3.SetIdentity();
-	g_matWorld3.Translate(Vector3(600,200,0));	
-	g_matLocal3.SetIdentity();
-
+	g_matWorld.SetIdentity();
+	g_matWorld.Translate(Vector3(150,200,0));
+	g_matLocal.SetIdentity();
 
 	if (!InitInstance (hInstance, nCmdShow))
 	{
@@ -86,7 +67,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	}
 
 	MSG msg;
-	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY2DTRANSFORM));
+	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY2DSHADING));
 	int oldT = GetTickCount();
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
@@ -117,10 +98,9 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.cbClsExtra		= 0;
 	wcex.cbWndExtra		= 0;
 	wcex.hInstance		= hInstance;
-	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MY2DTRANSFORM));
+	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MY2DSHADING));
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
-	//wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_MY2DTRANSFORM);
 	wcex.lpszMenuName	= NULL;
 	wcex.lpszClassName	= szWindowClass;
 	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
@@ -148,7 +128,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 
-
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
@@ -171,28 +150,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 		break;
-	case WM_ERASEBKGND:
-		return 1;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
-		Paint(hWnd, ps.hdc);
+		Paint(hWnd, hdc);
 		EndPaint(hWnd, &ps);
 		break;
+	case WM_ERASEBKGND:
+		return 1;
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
+		case VK_TAB:
+			g_WireFrame = !g_WireFrame;
+			break;
 		case VK_LEFT:
 			{
 				Matrix44 mat;
 				mat.SetRotationZ(0.1f);
-				g_matLocal1 *= mat;
+				g_matLocal *= mat;
 			}
 			break;
 		case VK_RIGHT:
 			{
 				Matrix44 mat;
 				mat.SetRotationZ(-0.1f);
-				g_matLocal1 *= mat;
+				g_matLocal *= mat;
 			}
 			break;
 		}
@@ -212,24 +194,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
  */
 void	MainLoop(int elapse_time)
 {
-	Matrix44 mat2;
-	mat2.SetRotationZ(1.f * (elapse_time*0.001f));
-	g_matLocal2 *= mat2;
-
-	Matrix44 mat3;
-	mat3.SetRotationZ(-4.f * (elapse_time*0.001f));
-	g_matLocal3 *= mat3;
-
-	static int incT = 0;
-	incT += elapse_time;
-	Vector3 pos(0, sin(incT*0.001f)*200.f, 0);
-
-	Matrix44 matT3;
-	matT3.SetIdentity();
-	matT3.Translate( Vector3(600,200,0) + pos );
-	g_matWorld3 = matT3;
-
-
 	// Render
 	Render(g_hWnd);
 	::InvalidateRect(g_hWnd, NULL, TRUE);
@@ -261,6 +225,43 @@ void RenderVertices(HDC hdc, const vector<Vector3> &vertices, const Matrix44 &tm
 	}
 }
 
+void RenderIndices(HDC hdc, const vector<Vector3> &vertices, const vector<int> &indices, const Matrix44 &tm)
+{
+	for (unsigned int i=0; i < indices.size(); i+=3)
+	{
+		Vector3 p1 = vertices[ indices[ i]];
+		Vector3 p2 = vertices[ indices[ i+1]];
+		Vector3 p3 = vertices[ indices[ i+2]];
+
+		p1 = p1 * tm;
+		p2 = p2 * tm;
+		p3 = p3 * tm;
+
+		Rasterizer::Color color(0,0,0,1);
+		Rasterizer::DrawTriangle(hdc, color, p1.x, p1.y,
+			color, p2.x, p2.y, color, p3.x, p3.y);
+	}
+}
+
+void RenderWire(HDC hdc, const vector<Vector3> &vertices, const vector<int> &indices, const Matrix44 &tm)
+{
+	for (unsigned int i=0; i < indices.size(); i+=3)
+	{
+		Vector3 p1 = vertices[ indices[ i]];
+		Vector3 p2 = vertices[ indices[ i+1]];
+		Vector3 p3 = vertices[ indices[ i+2]];
+
+		p1 = p1 * tm;
+		p2 = p2 * tm;
+		p3 = p3 * tm;
+
+		Rasterizer::Color color(0,0,0,1);
+		Rasterizer::DrawLine(hdc, color, p1.x, p1.y,color, p2.x, p2.y);
+		Rasterizer::DrawLine(hdc, color, p1.x, p1.y,color, p3.x, p3.y);
+		Rasterizer::DrawLine(hdc, color, p3.x, p3.y,color, p2.x, p2.y);
+	}
+}
+
 
 /**
  @brief 
@@ -276,13 +277,13 @@ void Paint(HWND hWnd, HDC hdc)
 	FillRect(hdcMem, &rc, hbrBkGnd);
 	DeleteObject(hbrBkGnd);
 
-	RenderVertices(hdcMem, g_vertices1, g_matLocal1 * g_matWorld1);
-	RenderVertices(hdcMem, g_vertices2, g_matLocal2 * g_matWorld2);
-	RenderVertices(hdcMem, g_vertices1, g_matLocal3 * g_matWorld3);
+	if (g_WireFrame)
+		RenderIndices(hdcMem, g_vertices, g_indices, g_matLocal * g_matWorld);
+	else
+		RenderWire(hdcMem, g_vertices, g_indices, g_matLocal * g_matWorld);
 
 	BitBlt(hdc, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, hdcMem, 0, 0, SRCCOPY);
 	SelectObject(hdcMem, hbmOld);
 	DeleteObject(hbmMem);
 	DeleteDC(hdcMem);
 }
-

@@ -10,7 +10,7 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="math">
-      <UniqueIdentifier>{9251b08a-8f93-4f11-80c7-44e96ca97a87}</UniqueIdentifier>
+      <UniqueIdentifier>{26ca4921-d4ff-422a-aec7-8f4ffa8b08a8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -18,21 +18,12 @@
     <None Include="small.ico">
       <Filter>리소스 파일</Filter>
     </None>
-    <None Include="2DTransform.ico">
+    <None Include="2DShading.ico">
       <Filter>리소스 파일</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="math\Vector3.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\Math.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="math\Matrix.h">
-      <Filter>math</Filter>
-    </ClInclude>
-    <ClInclude Include="2DTransform.h">
+    <ClInclude Include="2DShading.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
@@ -44,16 +35,31 @@
     <ClInclude Include="stdafx.h">
       <Filter>소스 파일</Filter>
     </ClInclude>
+    <ClInclude Include="math\Matrix.h">
+      <Filter>math</Filter>
+    </ClInclude>
     <ClInclude Include="math\Quaternion.h">
       <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\Vector3.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\Math.h">
+      <Filter>math</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawTriangle.h">
+      <Filter>소스 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="2DTransform.cpp">
+    <ClCompile Include="2DShading.cpp">
       <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="math\Quaternion.cpp">
+      <Filter>math</Filter>
     </ClCompile>
     <ClCompile Include="math\Vector3.cpp">
       <Filter>math</Filter>
@@ -61,12 +67,12 @@
     <ClCompile Include="math\Matrix.cpp">
       <Filter>math</Filter>
     </ClCompile>
-    <ClCompile Include="math\Quaternion.cpp">
-      <Filter>math</Filter>
+    <ClCompile Include="DrawTriangle.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="2DTransform.rc">
+    <ResourceCompile Include="2DShading.rc">
       <Filter>리소스 파일</Filter>
     </ResourceCompile>
   </ItemGroup>

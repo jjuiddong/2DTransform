@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{3ABFCA3A-E2A1-4F91-90CD-8D545A83E5C4}</ProjectGuid>
+    <ProjectGuid>{A8DBF697-EADA-43A6-9B0D-65D98ACAD7FF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>My2DTransform</RootNamespace>
+    <RootNamespace>My2DShading</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -72,12 +72,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="2DTransform.ico" />
+    <None Include="2DShading.ico" />
     <None Include="ReadMe.txt" />
     <None Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="2DTransform.h" />
+    <ClInclude Include="2DShading.h" />
+    <ClInclude Include="DrawTriangle.h" />
     <ClInclude Include="math\Math.h" />
     <ClInclude Include="math\Matrix.h" />
     <ClInclude Include="math\Quaternion.h" />
@@ -87,7 +88,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="2DTransform.cpp" />
+    <ClCompile Include="2DShading.cpp" />
+    <ClCompile Include="DrawTriangle.cpp" />
     <ClCompile Include="math\Matrix.cpp" />
     <ClCompile Include="math\Quaternion.cpp" />
     <ClCompile Include="math\Vector3.cpp" />
@@ -97,7 +99,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="2DTransform.rc" />
+    <ResourceCompile Include="2DShading.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
