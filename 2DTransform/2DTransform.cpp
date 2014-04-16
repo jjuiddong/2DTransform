@@ -88,18 +88,26 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	MSG msg;
 	HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_MY2DTRANSFORM));
 	int oldT = GetTickCount();
-	while (GetMessage(&msg, NULL, 0, 0))
+	while (1)
 	{
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+		if (PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE))
 		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+			if(msg.message == WM_QUIT)
+				break;
 		}
 
 		const int curT = GetTickCount();
-		const int elapseT = min(curT - oldT, 100);
-		oldT = curT;
-		MainLoop(elapseT);	
+		const int elapseT = curT - oldT;
+		if (elapseT > 30)
+		{
+			oldT = curT;
+			MainLoop(elapseT);	
+		}
 	}
 
 	return (int) msg.wParam;
