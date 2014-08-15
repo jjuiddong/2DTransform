@@ -183,7 +183,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		return 1;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
-		Paint(hWnd, ps.hdc);
+		Paint(hWnd, hdc);
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_KEYDOWN:
